@@ -18,7 +18,7 @@ class Event(Base):
     time = Column(String, index=True)
     description = Column(String, index=True)
 
-    participants = relationship("User", secondary=event_participants, back_populates="events")
+    participants = relationship("User", secondary=event_participants, back_populates="events", lazy="dynamic")
 
 class User(Base):
     __tablename__ = "users"

@@ -78,3 +78,10 @@ async def update_event(event_id: int, event: schemas.EventBase, db: Session = De
     return db_event
     # similar to the middleware, I need to know when the db_event has been updated, then start background task
 
+
+# this functionality would be written in other parts of the app (ex: a button is clicked that would trigger this code)
+# just creating this endpoint because I want to add users to events arbitrarily to test the app right now 
+@app.get('/addusertoevent', response_model=schemas.Event)
+async def add_user_to_event(user_id:int, event_id: int, db: Session = Depends(get_db)):
+    db_event = crud.add_user_to_event(db, event_id=event_id, user_id=user_id)
+    return db_event

@@ -41,6 +41,17 @@ def update_event(db: Session, event_id: int, event: schemas.EventBase):
     db.refresh(db_new_event)
     return db_new_event
 
+def add_user_to_event(db: Session, user_id: int, event_id: int):
+    # lookup user, add to participants on event
+    db_user = get_user(db, user_id)
+    db_event = get_event(db, event_id)
+
+    db_event.participants.add(db_user)
+    db.commit()
+    db.refresh()
+
+    return 'added'
+
 
 
 
