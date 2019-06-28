@@ -76,7 +76,6 @@ async def update_event(event_id: int, event: schemas.EventBase, db: Session = De
     update_event_encoded = jsonable_encoder(event)
     db_event = crud.update_event(db, event_id=event_id, event=update_event_encoded)
     return db_event
-    # similar to the middleware, I need to know when the db_event has been updated, then start background task
 
 
 # this functionality would be written in other parts of the app (ex: a button is clicked that would trigger this code)
