@@ -70,7 +70,6 @@ def read_event(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
     return db_event
 
-# update event 
 @app.put('/events/{event_id}', response_model=schemas.Event)
 async def update_event(event_id: int, event: schemas.EventBase, db: Session = Depends(get_db)):
     print(event)
@@ -79,26 +78,3 @@ async def update_event(event_id: int, event: schemas.EventBase, db: Session = De
     return db_event
     # similar to the middleware, I need to know when the db_event has been updated, then start background task
 
-
-
-
-
-# @app.get("/users/{user_id}", response_model=schemas.User)
-# def read_user(user_id: int, db: Session = Depends(get_db)):
-#     db_user = crud.get_user(db, user_id=user_id)
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return db_user
-
-
-# @app.post("/users/{user_id}/items/", response_model=schemas.Item)
-# def create_item_for_user(
-#     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
-# ):
-#     return crud.create_user_item(db=db, item=item, user_id=user_id)
-
-# # can remove this 
-# @app.get("/items/", response_model=List[schemas.Item])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     items = crud.get_items(db, skip=skip, limit=limit)
-#     return items
