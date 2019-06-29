@@ -20,18 +20,15 @@ def compose_message(subject: str, body: str, email: str):
 	msg = EmailMessage()
 	msg.set_content(body)
 	msg["Subject"] = subject
-	msg["From"] = "julia@localhost"
+	msg["From"] = "aurum.luna333@gmail.com"
 	msg["To"] = email
 	return msg
 
 def create_server():
 	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.starttls()
 	server.login(config.GMAIL_USERNAME, config.GMAIL_PASSWORD)
 	return server
-
-
-def quit_server(s):
-	s.quit()
 
 
 def send_email_update(db: Session, event_id: int):
@@ -43,9 +40,6 @@ def send_email_update(db: Session, event_id: int):
 
 	for user in db_event.participants:
 		email = user.email 
-		# send the email message with subject 
-
-		# the email is going to be the same for every user
 
 		# thinking that the email is the only thing that needs 
 		#   to be sent in the queue. if it fails, just add it
@@ -59,5 +53,5 @@ def send_email_update(db: Session, event_id: int):
 		message = compose_message(subject=subject, body=body, email=email)
 		s.send_message(message)
 
-	quit_server(s)
+	s.quit()
 
