@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.responses import Response
 
-from . import crud, models, schemas
+from . import crud, models, schemas, email
 from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -38,6 +38,15 @@ def get_db(request: Request):
 
 @app.put("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserBase, db: Session = Depends(get_db)):
+
+    # emails and phone numbers are unique values 
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user is not None:
+        raise HTTPException(status_code=409, detail="User with email already exists")
+    db_user_p = crud.get_user_by_phone(db, phone=user.phone)
+    if db_user_p is not None:
+        raise HTTPException(status_code=409, detail="User with phone number already exists")
+
     return crud.create_user(db=db, user=user)
 
 @app.get("/users/{user_id}", response_model=schemas.User)
@@ -71,10 +80,12 @@ def read_event(event_id: int, db: Session = Depends(get_db)):
     return db_event
 
 @app.put('/events/{event_id}', response_model=schemas.Event)
-async def update_event(event_id: int, event: schemas.EventBase, db: Session = Depends(get_db)):
+async def update_event(event_id: int, event: schemas.EventBase, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     print(event)
     update_event_encoded = jsonable_encoder(event)
     db_event = crud.update_event(db, event_id=event_id, event=update_event_encoded)
+
+    background_tasks.add_task(email.send_email_update(db, event_id=event_id))
     return db_event
 
 
@@ -82,5 +93,9 @@ async def update_event(event_id: int, event: schemas.EventBase, db: Session = De
 # just creating this endpoint because I want to add users to events arbitrarily to test the app right now 
 @app.get('/addusertoevent', response_model=schemas.Event)
 async def add_user_to_event(user_id:int, event_id: int, db: Session = Depends(get_db)):
+    db_user = crud.get_user(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=409, detail="User with id does not exist")
+
     db_event = crud.add_user_to_event(db, event_id=event_id, user_id=user_id)
     return db_event

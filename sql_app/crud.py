@@ -18,6 +18,9 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
+def get_user_by_phone(db: Session, phone: str):
+    return db.query(models.User).filter(models.User.phone == phone).first()
+
 def get_event(db: Session, event_id: int):
     return db.query(models.Event).filter(models.Event.id == event_id).first()
 
@@ -53,7 +56,8 @@ def add_user_to_event(db: Session, user_id: int, event_id: int):
     db_event = get_event(db, event_id)
     return db_event
 
-
-
+def get_users_for_event(db: Session, event_id: int):
+    db_event = get_event(db, event_id)
+    return db_event.participants
 
 
