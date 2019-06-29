@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.responses import Response
 
-from . import crud, models, schemas, email
+from . import crud, models, schemas, email_updates
 from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -85,7 +85,7 @@ async def update_event(event_id: int, event: schemas.EventBase, background_tasks
     update_event_encoded = jsonable_encoder(event)
     db_event = crud.update_event(db, event_id=event_id, event=update_event_encoded)
 
-    background_tasks.add_task(email.send_email_update(db, event_id=event_id))
+    background_tasks.add_task(email_updates.send_email_update(db, event_id=event_id))
     return db_event
 
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from . import schemas, crud
 
 def construct_subject(event: schemas.Event):
-	return "%s: Update on location, time, date" % event.name
+	return "%s has changed its location, date, or time" % event.name
 
 def construct_body(event: schemas.Event):
     message = ("Here are the latest details on %s - \n"

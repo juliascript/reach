@@ -38,6 +38,7 @@ def update_event(db: Session, event_id: int, event: schemas.EventBase):
     db_event = get_event(db, event_id)
     db_new_event_details = models.Event(**event, participants=db_event.participants, id=event_id)
 
+    # object is deleted since this is done through a PUT request
     db.delete(db_event)
     db.add(db_new_event_details)
     db.commit()
