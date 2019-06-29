@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
+from email.message import EmailMessage
+import smtplib
 
-from . import schemas, crud
+from . import schemas, crud, config
 
 def construct_subject(event: schemas.Event):
 	return "%s has changed its location, date, or time" % event.name
@@ -14,10 +16,30 @@ def construct_body(event: schemas.Event):
                 ) % (event.name, event.date, event.time, event.location, event.description)
     return message
 
+def compose_message(subject: str, body: str, email: str):
+	msg = EmailMessage()
+	msg.set_content(body)
+	msg["Subject"] = subject
+	msg["From"] = "julia@localhost"
+	msg["To"] = email
+	return msg
+
+def create_server():
+	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.login(config.GMAIL_USERNAME, config.GMAIL_PASSWORD)
+	return server
+
+
+def quit_server(s):
+	s.quit()
+
+
 def send_email_update(db: Session, event_id: int):
 	db_event = crud.get_event(db, event_id=event_id)
 	subject = construct_subject(db_event)
 	body = construct_body(db_event)
+
+	s = create_server()
 
 	for user in db_event.participants:
 		email = user.email 
@@ -33,4 +55,9 @@ def send_email_update(db: Session, event_id: int):
 		print(email)
 		print(subject)
 		print(body)
+
+		message = compose_message(subject=subject, body=body, email=email)
+		s.send_message(message)
+
+	quit_server(s)
 
