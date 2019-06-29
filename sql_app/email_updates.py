@@ -20,12 +20,13 @@ def compose_message(subject: str, body: str, email: str):
 	msg = EmailMessage()
 	msg.set_content(body)
 	msg["Subject"] = subject
-	msg["From"] = "julia@localhost"
+	msg["From"] = "aurum.luna333@gmail.com"
 	msg["To"] = email
 	return msg
 
 def create_server():
 	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.starttls()
 	server.login(config.GMAIL_USERNAME, config.GMAIL_PASSWORD)
 	return server
 
