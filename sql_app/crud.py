@@ -33,24 +33,25 @@ def create_event(db: Session, event: schemas.EventBase):
 
 def update_event(db: Session, event_id: int, event: schemas.EventBase):
     db_event = get_event(db, event_id)
-    db_new_event = models.Event(**event, participants=db_event.participants, id=event_id)
+    db_new_event_details = models.Event(**event, participants=db_event.participants, id=event_id)
 
     db.delete(db_event)
-    db.add(db_new_event)
+    db.add(db_new_event_details)
     db.commit()
-    db.refresh(db_new_event)
-    return db_new_event
+    db.refresh(db_new_event_details)
+    return db_new_event_details
 
 def add_user_to_event(db: Session, user_id: int, event_id: int):
-    # lookup user, add to participants on event
-    db_user = get_user(db, user_id)
-    db_event = get_event(db, event_id)
-
-    db_event.participants.add(db_user)
+    db_entry = models.EventInterest(event_id=event_id, user_id=user_id)
+    
+    # add new user/event pair to association table
+    db.add(db_entry)
     db.commit()
-    db.refresh()
+    db.refresh(db_entry)
 
-    return 'added'
+    # return the updated event
+    db_event = get_event(db, event_id)
+    return db_event
 
 
 

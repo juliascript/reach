@@ -3,11 +3,6 @@ from sqlalchemy.orm import relationship
 
 from .database import Base
 
-event_participants = Table('event_participants', Base.metadata,
-    Column("user_id", Integer, ForeignKey("users.id")),
-    Column("event_id", Integer, ForeignKey("events.id"))
-)
-
 class Event(Base):
     __tablename__ = "events"
 
@@ -18,7 +13,7 @@ class Event(Base):
     time = Column(String, index=True)
     description = Column(String, index=True)
 
-    participants = relationship("User", secondary=event_participants, back_populates="events")
+    participants = relationship("User", secondary="event_participants", back_populates="events")
 
 class User(Base):
     __tablename__ = "users"
@@ -28,4 +23,10 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     phone = Column(String, unique=True, index=True)
 
-    events = relationship("Event", secondary=event_participants, back_populates="participants")
+    events = relationship("Event", secondary="event_participants", back_populates="participants")
+
+class EventInterest(Base):
+    __tablename__ = "event_participants"
+
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    event_id = Column(Integer, ForeignKey("events.id"), primary_key=True)
